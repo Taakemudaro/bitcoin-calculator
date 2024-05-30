@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <title>手数料登録編集</title>
+</head>
+<body>
+    <div class="header">
+        <h1 class="tool-title">手数料登録の編集</h1>
+    </div>
+    <div class="main">
+        <div class="add-form">
+            <form th:method="put" action="/put/commission" th:object="${formEditCommission}">
+                <!-- ↑{id}はURLのid部分を取得したい(GetMappingからidを取得して入れられそう多分) -->
+                    <p>数量と金額を編集してください！</p>
+                    <input th:field="*{id}" value="formEditCommission.id" type="hidden" />
+                    <input th:field="*{recordId}" value="formEditCommission.recordId" type="hidden" />
+                    <label for="price">金額(¥)</label>
+                    <input th:field="*{price}" id="price" name="price" value="${formEditCommission.price}" type="text" />
+                    <input type="submit" value="更新">
+            </form>
+        </div>
+    </div>
+    <div class="footer-contents">   <!-- レコードページに戻る -->
+        <a th:href="@{/record/{id}(id=${formEditCommission.recordId})}">
+            <input type="submit" value="戻る">
+        </a>
+    </div>
+</body>
+</html>

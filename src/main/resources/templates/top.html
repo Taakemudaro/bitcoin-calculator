@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <title>仮想通貨税金計算ツールTOP</title>
+</head>
+<body>
+    <div class="header">
+        <h1 class="tool-title">仮想通貨税金計算ツール</h1>
+    </div>
+    <div class="main">
+        <div class="add-record">
+            <form method="post" action="/add" th:object="${formAddRecord}">
+                <div class="yearly-form">
+                    <label for="name">今年の年は？？</label>
+                    <input th:field="*{name}" id="name" name="name" type="text"/>
+                    <input type="submit" value="決定">
+                </div>
+            </form>
+        </div>
+        <!-- レコードリスト（履歴） -->
+        <div class="record-list">
+            <h2 class="list-headline">年号レコード一覧</h2>
+            <p class="record-description">※↓↓<span>対象年号</span>をクリックして利用してください</p>
+            <!-- 年号をリンクにして編集する形にしたい -->
+            <table class="record-table">
+                <tr>
+                    <th>ID</th>
+                    <th>年号</th>
+                    <th>作成日</th>
+                    <th>更新日</th>
+                </tr>
+                <tr th:each="record : ${records}">
+                    <td th:text="${record.id}"></td>
+                    <!-- nameより各年号レコードへアクセス(リンクで使用するのはid) -->
+                    <td><a th:href="@{/record/{id}(id=${record.id})}" th:text="${record.name}"></a></td>
+                    <!-- 作成日 -->
+                    <td th:text="${#dates.format(record.createdDate, 'yyyy-MM-dd')}"></td>
+                    <!-- 更新日 -->
+                    <td th:text="${#dates.format(record.updatedDate, 'yyyy-MM-dd')}"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

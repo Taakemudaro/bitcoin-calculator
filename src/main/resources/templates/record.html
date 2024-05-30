@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <title th:text="${annualName.getName} + '年' + 'レコード'"></title>
+</head>
+<body>
+    <div class="header">
+        <h1 class="tool-title" th:text="${annualName.getName} + '年' + 'レコード'"></h1>
+    </div>
+    <div class="main">
+        <div class="calculate-form">  <!-- 計算処理の算出結果反映 -->
+            <h2 class="list-headline" th:text="${annualName.getName} + '年のビットコイン売買の所得金額計算結果！！'"></h2>
+            <div class="table-gap">
+                <table class="record-table">
+                    <tr>
+                        <th>単位</th>
+                        <th class="table-column">今年の所得金額</th>
+                        <th class="table-column">今年の年始残高</th>
+                        <th class="table-column">今年の経費合計</th>
+                    </tr>
+                    <tr>
+                        <td>数量(BTC)</td>
+                        <td>-</td>
+                        <td class="table-column" th:text="${calculatePrice.getBeginningAmount}"></td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>金額(¥)</td>
+                        <td class="table-column" th:text="${#numbers.formatInteger(calculatePrice.getIncomeAmount, 3, 'COMMA')}"></td>
+                        <td class="table-column" th:text="${#numbers.formatInteger(calculatePrice.getBeginningPrice, 3, 'COMMA')}"></td>
+                        <td class="table-column" th:text="${#numbers.formatInteger(calculatePrice.getTotalCost, 3, 'COMMA')}"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="table-gap">
+                <table class="record-table">
+                    <tr>
+                        <th>単位</th>
+                        <th>購入合計</th>
+                        <th>売却合計</th>
+                        <th>総平均単価(※1)</th>
+                        <th>売却原価(※2)</th>
+                        <th>手数料合計</th>
+                    </tr>
+                    <tr>
+                        <td>数量(BTC)</td>
+                        <td th:text="${totalPurchaseAmount.getAmount}"></td>
+                        <td th:text="${totalSellingAmount.getAmount}"></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>金額(¥)</td>
+                        <!-- #numbers.formatIntegerで3桁のカンマ区切り -->
+                        <td th:text="${#numbers.formatInteger(totalPurchaseAmount.getPrice, 3, 'COMMA')}"></td>
+                        <td th:text="${#numbers.formatInteger(totalSellingAmount.getPrice, 3, 'COMMA')}"></td>
+                        <td th:text="${#numbers.formatInteger(calculatePrice.getAveragePrice, 3, 'COMMA')}"></td>
+                        <td th:text="${#numbers.formatInteger(calculatePrice.getSellingCost, 3, 'COMMA')}"></td>
+                        <td th:text="${#numbers.formatInteger(totalCommissionAmount.getPrice, 3, 'COMMA')}"></td>
+                    </tr>
+                </table>
+            </div>
+            <p>※1：総平均単価は前年の年始残高額と購入金額の合計を前年の年始残高と購入数量の合計で割った額</p>
+            <p>※2：売却原価は購入の際に払った元の価格を出しています！(手数料以外の経費)</p>
+        </div>
+
+        <div class="add-record">
+            <div class="add-form"> <!-- 手数料登録 -->
+                <h2 class="list-headline">今年かかった手数料登録</h2>
+                <p>今年の売買でかかった手数料を入力してください！</p>
+                <form method="post" action="/commission" th:object="${formAddCommission}">
+                    <input th:field="*{recordId}" id="commissionRecordId" name="commissionRecordId" type="hidden" />
+                    <label for="commissionPrice">金額(¥)</label>
+                    <input th:field="*{price}" id="commissionPrice" name="commissionPrice" type="text" />
+                    <input type="submit" value="決定" />
+                </form>
+            </div>
+            <div class="record-list">　 <!-- 手数料登録履歴 -->
+                <div class="list-table">
+                    <h2 class="list-headline">手数料登録履歴</h2>
+                    <table class="record-table">
+                        <tr>
+                            <th>ID</th>
+                            <th>購入価格(¥)</th>
+                            <th>登録日</th>
+                            <th>更新日</th>
+                            <th>編集</th>
+                            <th>削除</th>
+                        </tr>
+                        <tr th:each="commissionAmount : ${commissionAmounts}">
+                            <td th:text="${commissionAmount.id}"></td>
+                            <td th:text="${#numbers.formatInteger(commissionAmount.price, 3, 'COMMA')}"></td>
+                            <!-- 作成日 -->
+                            <td th:text="${#dates.format(commissionAmount.createdDate, 'yyyy-MM-dd')}"></td>
+                            <!-- 更新日 -->
+                            <td th:text="${#dates.format(commissionAmount.updatedDate, 'yyyy-MM-dd')}"></td>
+                            <td>
+                                <a th:href="@{/editCommission/{id}(id=${commissionAmount.id})}">
+                                    <input type="submit" value="編集" />
+                                </a>
+                            </td>
+                            <td>
+                                <form th:method="delete" th:action="@{/delete/commission/{id}(id=${commissionAmount.id})}">
+                                    <input type="submit" value="削除" />
+                                </form>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="add-form">  <!-- 年始残高入力欄 -->
+                <div class="beginning-balance">
+                    <!-- 年始残高登録済みの場合の反映 -->
+                    <div class="list-table" th:if="${#lists.size(formSelectBeginnings) > 0}">
+                        <h2 class="list-headline">前年の年始残高登録内容</h2>
+                        <p>ご登録いただいた年始残高は下記になります！</p>
+                        <p>※売却数量は小数点第4位以降は四捨五入されます。</p>
+                        <table class="record-table">
+                            <tr>
+                                <th>ID</th>
+                                <th>数量(BTC)</th>
+                                <th>繰越価格(¥)</th>
+                                <th>登録日</th>
+                                <th>更新日</th>
+                                <th>編集</th>
+                                <th>削除</th>
+                            </tr>
+                            <tr th:each="formSelectBeginning : ${formSelectBeginnings}">
+                                <td th:text="${formSelectBeginning.id}"></td>
+                                <td th:text="${formSelectBeginning.amount}"></td>
+                                <td th:text="${#numbers.formatInteger(formSelectBeginning.price, 3, 'COMMA')}"></td>
+                                <td th:text="${#dates.format(formSelectBeginning.createdDate, 'yyyy-MM-dd')}"></td>
+                                <td th:text="${#dates.format(formSelectBeginning.updatedDate, 'yyyy-MM-dd')}"></td>
+                                <td>
+                                    <a th:href="@{/editBeginning/{id}(id=${formSelectBeginning.id})}">
+                                        <input type="submit" value="編集" />
+                                    </a>
+                                </td>
+                                <td>
+                                    <form th:method="delete" th:action="@{/delete/beginning/{id}(id=${formSelectBeginning.id})}">
+                                        <input type="submit" value="削除" />
+                                    </form>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!-- 年始残高未登録の場合の反映 -->
+                    <div class="yearly-form" th:unless="${#lists.size(formSelectBeginnings) > 0}">
+                        <form method="post" action="/beginning" th:object="${formAddBeginning}">
+                            <h2 class="list-headline">前年の年始残高登録<span class="headline-text"> (※ご登録は1件のみ入力可能)</span></h2>
+                            <p>数量と金額を入力してください！</p>
+                            <input th:field="*{recordId}" id="beginningRecordId" name="beginningRecordId" type="hidden" />
+                            <label for="beginningAmount">数量(BTC)</label>
+                            <input th:field="*{amount}" id="beginningAmount" name="beginningAmount" type="text" />
+                            <label for="beginningPrice">繰越金額(¥)</label>
+                            <input th:field="*{price}" id="beginningPrice" name="beginningPrice" type="text" />
+                            <input type="submit" value="決定">
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="add-form">　　<!-- 購入登録 -->
+                <h2 class="list-headline">購入登録</h2>
+                <p>数量と金額を入力してください！</p>
+                <form method="post" action="/purchase" th:object="${formAddPurchase}">
+                    <div class="yearly-form">
+                        <input th:field="*{recordId}" id="purchaseRecordId" name="purchaseRecordId" type="hidden" />
+                        <label for="purchaseAmount">数量(BTC)</label>
+                        <input th:field="*{amount}" id="purchaseAmount" name="purchaseAmount" type="text"/>
+                        <label for="purchasePrice">金額(¥)</label>
+                        <input th:field="*{price}" id="purchasePrice" name="purchasePrice" type="text"/>
+    <!--                    <label for="selectBuySell">↓↓購入か売却かを選択してください！</label>-->
+    <!--                    <select id="selectBuySell" name="selectBuySell">-->
+    <!--                        <option value="purchase">購入</option>-->
+    <!--                        <option value="sell">売却</option>-->
+    <!--                    </select>-->
+                        <input type="submit" value="決定">
+                    </div>
+                </form>
+            </div>
+            <div class="add-form">　　<!-- 売却登録 -->
+                <h2 class="list-headline">売却登録</h2>
+                <p>数量と金額を入力してください！</p>
+                <form method="post" action="/selling" th:object="${formAddSelling}">
+                    <div class="yearly-form">
+                        <input th:field="*{recordId}" id="sellingRecordId" name="sellingRecordId" type="hidden" />
+                        <label for="sellingAmount">数量(BTC)</label>
+                        <input th:field="*{amount}" id="sellingAmount" name="sellingAmount" type="text"/>
+                        <label for="sellingPrice">金額(¥)</label>
+                        <input th:field="*{price}" id="sellingPrice" name="sellingPrice" type="text"/>
+                        <!--                    <label for="selectBuySell">↓↓購入か売却かを選択してください！</label>-->
+                        <!--                    <select id="selectBuySell" name="selectBuySell">-->
+                        <!--                        <option value="purchase">購入</option>-->
+                        <!--                        <option value="sell">売却</option>-->
+                        <!--                    </select>-->
+                        <input type="submit" value="決定">
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="record-list">　 <!-- 購入登録履歴 -->
+            <div class="list-table">
+                <h2 class="list-headline">購入登録履歴</h2>
+                <p>※購入数量は小数点第4位以降は四捨五入されます</p>
+                <table class="record-table">
+                    <tr>
+                        <th>ID</th>
+                        <th>購入数量(BTC)</th>
+                        <th>購入価格(¥)</th>
+                        <th>登録日</th>
+                        <th>更新日</th>
+                        <th>編集</th>
+                        <th>削除</th>
+                    </tr>
+                    <tr th:each="purchaseAmount : ${purchaseAmounts}">
+                        <td th:text="${purchaseAmount.id}"></td>
+                        <td th:text="${purchaseAmount.amount}"></td>
+                        <td th:text="${#numbers.formatInteger(purchaseAmount.price, 3, 'COMMA')}"></td>
+                        <!-- 作成日 -->
+                        <td th:text="${#dates.format(purchaseAmount.createdDate, 'yyyy-MM-dd')}"></td>
+                        <!-- 更新日 -->
+                        <td th:text="${#dates.format(purchaseAmount.updatedDate, 'yyyy-MM-dd')}"></td>
+                        <td>
+                            <a th:href="@{/editPurchase/{id}(id=${purchaseAmount.id})}">
+                                <input type="submit" value="編集" />
+                            </a>
+                        </td>
+                        <td>
+                            <form th:method="delete" th:action="@{/delete/purchase/{id}(id=${purchaseAmount.id})}">
+                                <input type="submit" value="削除" />
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="list-table">　　<!-- 売却登録履歴 -->
+                <h2 class="list-headline">売却登録履歴</h2>
+                <p>※売却数量は小数点第4位以降は四捨五入されます</p>
+                <table class="record-table">
+                    <tr>
+                        <th>ID</th>
+                        <th>売却数量(BTC)</th>
+                        <th>売却価格(¥)</th>
+                        <th>登録日</th>
+                        <th>更新日</th>
+                        <th>編集</th>
+                        <th>削除</th>
+                    </tr>
+                    <tr th:each="sellingAmount : ${sellingAmounts}">
+                        <td th:text="${ sellingAmount.id }"></td>
+                        <td th:text="${ sellingAmount.amount }"></td>
+                        <td th:text="${#numbers.formatInteger(sellingAmount.price, 3, 'COMMA')}"></td>
+                        <td th:text="${ #dates.format(sellingAmount.createdDate, 'yyyy-MM-dd') }"></td>
+                        <td th:text="${ #dates.format(sellingAmount.updatedDate, 'yyyy-MM-dd') }"></td>
+                        <td>
+                            <a th:href="@{/editSelling/{id}(id=${sellingAmount.id})}">
+                                <input type="submit" value="編集" />
+                            </a>
+                        </td>
+                        <td>
+                            <form th:method="delete" th:action="@{/delete/selling/{id}(id=${sellingAmount.id})}" >
+                                <input type="submit" value="削除" />
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="footer-contents">　　<!-- 戻るボタン -->
+            <form action="/">
+                <input type="submit" value="戻る" />
+            </form>
+        </div>
+    </div>
+</body>
+</html>
