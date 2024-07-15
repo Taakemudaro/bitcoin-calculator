@@ -14,6 +14,8 @@
             <form th:method="put" action="/put/beginning" th:object="${formEditBeginning}">
                 <!-- ↑{id}はURLのid部分を取得したい(GetMappingからidを取得して入れられそう多分) -->
                     <p>数量と金額を編集してください！</p>
+                    <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}">Amount Errors</p>
+                    <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Price Errors</p>
                     <input th:field="*{id}" value="formEditBeginning.id" type="hidden" />
                     <input th:field="*{recordId}" value="formEditBeginning.recordId" type="hidden" />
                     <label for="amount">数量(BTC)</label>

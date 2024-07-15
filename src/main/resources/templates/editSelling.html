@@ -14,6 +14,8 @@
 <!--            <div th:if="${#lists.size(formEditSelling)} > 0">-->
             <form th:method="put" action="/put/selling" th:object="${formEditSelling}">
                     <p>数量と金額を編集してください！</p>
+                    <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}">Amount Errors</p>
+                    <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Price Errors</p>
                     <input th:field="*{id}" value="formEditSelling.id" type="hidden" />
                     <input th:field="*{recordId}" value="formEditSelling.recordId" type="hidden" />
                     <label for="amount">数量(BTC)</label>

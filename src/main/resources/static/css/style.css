@@ -94,4 +94,9 @@ Main
 .footer-contents {
     padding-top: 10px;
 }
-
+/*
+EditRecord
+*/
+.record-name {
+    color: #ff0000;
+}

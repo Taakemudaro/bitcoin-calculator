@@ -151,10 +151,15 @@ public class CalculateService {
         //Priceはint型の為、BigDecimalの値と計算できるようにする為、int→BigDecimalに変換
         BigDecimal beginningBigDecimal = BigDecimal.valueOf(calculateBeginning.getPrice());
         BigDecimal purchaseBigDecimal = BigDecimal.valueOf(calculatePurchase.getPrice());
+        System.out.println("purchaseBigDecimal:" + purchaseBigDecimal);
+        System.out.println("beginningBigDecimal:" + beginningBigDecimal);
 
         //計算処理
         //※下記で小数点を使用した割り算を使用する場合、RoundingModeクラスで丸め処理をする必要あり
-        averageBigDecimal = (beginningBigDecimal.add(purchaseBigDecimal)).divide(calculateBeginning.getAmount().add(calculatePurchase.getAmount()), RoundingMode.HALF_UP);
+        BigDecimal beginningPurchaseAmount = calculateBeginning.getAmount().add(calculatePurchase.getAmount());
+        if(beginningPurchaseAmount.compareTo(BigDecimal.ZERO) != 0) {
+            averageBigDecimal = (beginningBigDecimal.add(purchaseBigDecimal)).divide(beginningPurchaseAmount, RoundingMode.HALF_UP);
+        }
         sellingCostBigDecimal = averageBigDecimal.multiply(calculateSelling.getAmount());
         beginningAmount = (calculateBeginning.getAmount().add(calculatePurchase.getAmount()).subtract(calculateSelling.getAmount()));
         beginningPriceBigDecimal = averageBigDecimal.multiply(beginningAmount);

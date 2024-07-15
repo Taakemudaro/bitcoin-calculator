@@ -12,10 +12,12 @@
     <div class="main">
         <div class="add-record">
             <form method="post" action="/add" th:object="${formAddRecord}">
+                <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</p>
                 <div class="yearly-form">
                     <label for="name">今年の年は？？</label>
                     <input th:field="*{name}" id="name" name="name" type="text"/>
                     <input type="submit" value="決定">
+
                 </div>
             </form>
         </div>
@@ -30,6 +32,8 @@
                     <th>年号</th>
                     <th>作成日</th>
                     <th>更新日</th>
+                    <th>編集</th>
+                    <th>削除</th>
                 </tr>
                 <tr th:each="record : ${records}">
                     <td th:text="${record.id}"></td>
@@ -39,6 +43,16 @@
                     <td th:text="${#dates.format(record.createdDate, 'yyyy-MM-dd')}"></td>
                     <!-- 更新日 -->
                     <td th:text="${#dates.format(record.updatedDate, 'yyyy-MM-dd')}"></td>
+                    <td>
+                        <a th:href="@{/editRecord/{id}(id=${record.id})}">
+                            <input type="submit" value="編集" />
+                        </a>
+                    </td>
+                    <td>
+                        <form th:method="delete" th:action="@{/delete/record/{id}(id=${record.id})}">
+                            <input type="submit" value="削除" />
+                        </form>
+                    </td>
                 </tr>
             </table>
         </div>

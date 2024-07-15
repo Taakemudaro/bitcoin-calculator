@@ -32,6 +32,7 @@ public class RecordService {
         //作成したArrayListにOptionalの値をAnnualRecord型で代入（この方法だとエラーにならない）
         //idがなかった場合にnullを返す為、orElseが必要
         results.add((AnnualRecord) recordRepository.findById(id).orElse(null));
+//        System.out.println("results:" + results);
         List<RecordForm> records = setRecordForm(results);
         return records.get(0);
     }
@@ -40,6 +41,15 @@ public class RecordService {
 //        List<RecordForm> records = setRecordForm(results);
 //        return records;
 //    }
+
+    public RecordForm findRecordByName(Integer name) {
+        List<AnnualRecord> results = recordRepository.findByName(name);
+        List<RecordForm> records = setRecordForm(results);
+        if(records.isEmpty()) {
+            return null;
+        }
+        return records.get(0);
+    }
     /*
      *取得したEntityからFormに変換する処理
      */
@@ -74,5 +84,11 @@ public class RecordService {
         record.setCreatedDate(recordForm.getCreatedDate());
         record.setUpdatedDate(recordForm.getUpdatedDate());
         return record;
+    }
+    /*
+     *レコード削除処理
+     */
+    public void deleteRecord(Integer id) {
+        recordRepository.deleteById(id);
     }
 }

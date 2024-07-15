@@ -72,6 +72,7 @@
                 <h2 class="list-headline">今年かかった手数料登録</h2>
                 <p>今年の売買でかかった手数料を入力してください！</p>
                 <form method="post" action="/commission" th:object="${formAddCommission}">
+                    <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Price Error</p>
                     <input th:field="*{recordId}" id="commissionRecordId" name="commissionRecordId" type="hidden" />
                     <label for="commissionPrice">金額(¥)</label>
                     <input th:field="*{price}" id="commissionPrice" name="commissionPrice" type="text" />
@@ -153,6 +154,8 @@
                         <form method="post" action="/beginning" th:object="${formAddBeginning}">
                             <h2 class="list-headline">前年の年始残高登録<span class="headline-text"> (※ご登録は1件のみ入力可能)</span></h2>
                             <p>数量と金額を入力してください！</p>
+                            <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}">Amount Error</p>
+                            <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Price Error</p>
                             <input th:field="*{recordId}" id="beginningRecordId" name="beginningRecordId" type="hidden" />
                             <label for="beginningAmount">数量(BTC)</label>
                             <input th:field="*{amount}" id="beginningAmount" name="beginningAmount" type="text" />
@@ -168,6 +171,8 @@
                 <p>数量と金額を入力してください！</p>
                 <form method="post" action="/purchase" th:object="${formAddPurchase}">
                     <div class="yearly-form">
+                        <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}">Amount Error</p>
+                        <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Price Error</p>
                         <input th:field="*{recordId}" id="purchaseRecordId" name="purchaseRecordId" type="hidden" />
                         <label for="purchaseAmount">数量(BTC)</label>
                         <input th:field="*{amount}" id="purchaseAmount" name="purchaseAmount" type="text"/>
@@ -187,6 +192,8 @@
                 <p>数量と金額を入力してください！</p>
                 <form method="post" action="/selling" th:object="${formAddSelling}">
                     <div class="yearly-form">
+                        <p th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}">Amount Error</p>
+                        <p th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Price Error</p>
                         <input th:field="*{recordId}" id="sellingRecordId" name="sellingRecordId" type="hidden" />
                         <label for="sellingAmount">数量(BTC)</label>
                         <input th:field="*{amount}" id="sellingAmount" name="sellingAmount" type="text"/>
